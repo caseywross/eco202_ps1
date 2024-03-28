@@ -4,6 +4,7 @@ library(plotly)
 library(dplyr)
 library(tidyr)
 library(stringr)
+library(gt)
 
 # Define UI ----
 ui <- fluidPage(
@@ -43,18 +44,6 @@ ui <- fluidPage(
       # Output: Text  ----
       tableOutput("answer_key")
     )
-  ),
-
-  # Custom JavaScript to restrict input to digits 0-9 ----
-  tags$script("
-    shinyjs.limitDigits = function() {
-      $('.numericInput').keypress(function(e) {
-        if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
-          return false;
-        }
-      });
-    }
-    shinyjs.limitDigits();"
   )
 )
 
@@ -109,12 +98,27 @@ server <- function(input, output, session) {
     )
   })
 
-  # Calculate production based on input values ----
-  output$production_table <- renderTable({
 
-    data_tbl_reactive() %>% pivot_wider(names_from = Product, values_from = Production)
+  # Calculate production based on input values ----
+  output$production_table <- render_gt({
+
+    # Get the production data
+    production_tbl <- data_tbl_reactive() %>%
+      pivot_wider(names_from = Product, values_from = Production)
+
+    # Create gt table and apply cell styling
+    production_tbl %>%
+      gt() %>%
+      data_color(
+        columns = c(Gloves, Scarves),
+        method = "numeric",
+        palette = c("white", "green")
+      )
 
   })
+
+
+
 
   # Create production plot based on input values ----
   output$production_plot <- renderPlotly({
@@ -125,11 +129,11 @@ server <- function(input, output, session) {
       select(-Product, -Production)
 
     # Create plotly line plot
-    plot_ly(plot_data, x = ~scarves_prod, y = ~gloves_prod, color = ~Worker, type = 'scatter', mode = 'lines',
+    plot_ly(plot_data, x = ~gloves_prod, y = ~scarves_prod, color = ~Worker, type = 'scatter', mode = 'lines',
             line = list(shape = "linear")) %>%
       layout(title = "Production Curve",
-             xaxis = list(title = "Scarves"),
-             yaxis = list(title = "Gloves"))
+             xaxis = list(title = "Gloves"),
+             yaxis = list(title = "Scarves"))
   })
 
 
