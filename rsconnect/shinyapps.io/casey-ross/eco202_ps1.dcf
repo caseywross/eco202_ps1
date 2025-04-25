@@ -1,0 +1,12 @@
+name: eco202_ps1
+title: eco202_ps1
+username: casey-ross
+account: casey-ross
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 12286273
+bundleId: 8834910
+url: https://casey-ross.shinyapps.io/eco202_ps1/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
